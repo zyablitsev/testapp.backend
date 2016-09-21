@@ -1,0 +1,3 @@
+port: 8701
+logpath: /var/log/testapp/requests.log
+
