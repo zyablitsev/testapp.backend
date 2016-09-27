@@ -3,7 +3,6 @@ package model
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"net"
 	"os"
 	"strconv"
@@ -87,7 +86,6 @@ func (m Data) ReadLog() error {
 			}
 		}
 	}
-	fmt.Println("data updated")
 
 	return nil
 }
