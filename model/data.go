@@ -62,10 +62,7 @@ func (m *Data) ReadLog() error {
 		if _, ok := ips[ipBytes]; !ok {
 			ips[ipBytes] = make(map[int]bool)
 		}
-
-		if _, ok := ips[ipBytes][userID]; !ok {
-			ips[ipBytes][userID] = true
-		}
+		ips[ipBytes][userID] = true
 
 		for x := range ips[ipBytes] {
 			if x == userID {
@@ -75,26 +72,12 @@ func (m *Data) ReadLog() error {
 			if _, ok := m.users[x]; !ok {
 				m.users[x] = make(map[int]int8)
 			}
-
-			if _, ok := m.users[x][userID]; !ok {
-				m.users[x][userID] = 1
-			} else {
-				if m.users[x][userID] < 2 {
-					m.users[x][userID] += 1
-				}
-			}
+			m.users[x][userID] += 1
 
 			if _, ok := m.users[userID]; !ok {
 				m.users[userID] = make(map[int]int8)
 			}
-
-			if _, ok := m.users[userID][x]; !ok {
-				m.users[userID][x] = 1
-			} else {
-				if m.users[userID][x] < 2 {
-					m.users[userID][x] += 1
-				}
-			}
+			m.users[userID][x] += 1
 		}
 	}
 
