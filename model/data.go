@@ -16,7 +16,7 @@ type Data struct {
 	ips   map[[4]byte]map[int]bool
 }
 
-func (m Data) ReadLog() error {
+func (m *Data) ReadLog() error {
 	var (
 		logFile *os.File
 		ip      net.IP
