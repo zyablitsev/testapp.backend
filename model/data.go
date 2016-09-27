@@ -12,8 +12,7 @@ import (
 
 type Data struct {
 	seek  int64
-	users map[int]map[int]int
-	ips   map[[4]byte]map[int]int
+	users map[int]map[int]int8
 }
 
 func (m *Data) ReadLog() error {
@@ -27,7 +26,7 @@ func (m *Data) ReadLog() error {
 		ipBytes                         [4]byte
 		userID, index                   int
 
-		ips map[[4]byte]map[int]int = make(map[[4]byte]map[int]int)
+		ips map[[4]byte]map[int]bool = make(map[[4]byte]map[int]bool)
 
 		err error
 	)
@@ -60,35 +59,40 @@ func (m *Data) ReadLog() error {
 			return err
 		}
 
-		if _, ok := m.ips[ipBytes]; !ok {
-			m.ips[ipBytes] = make(map[int]int)
-			ips[ipBytes] = m.ips[ipBytes]
+		if _, ok := ips[ipBytes]; !ok {
+			ips[ipBytes] = make(map[int]bool)
 		}
 
 		if _, ok := ips[ipBytes][userID]; !ok {
-			ips[ipBytes][userID] = 1
-			m.ips[ipBytes][userID] = 1
-		} else {
-			ips[ipBytes][userID] += 1
-			m.ips[ipBytes][userID] += 1
+			ips[ipBytes][userID] = true
 		}
-	}
 
-	for _, v := range ips {
-		for uid := range v {
-			for uid2, count := range v {
-				if uid2 == uid {
-					continue
+		for x := range ips[ipBytes] {
+			if x == userID {
+				continue
+			}
+
+			if _, ok := m.users[x]; !ok {
+				m.users[x] = make(map[int]int8)
+			}
+
+			if _, ok := m.users[x][userID]; !ok {
+				m.users[x][userID] = 1
+			} else {
+				if m.users[x][userID] < 2 {
+					m.users[x][userID] += 1
 				}
+			}
 
-				if _, ok := m.users[uid]; !ok {
-					m.users[uid] = make(map[int]int)
-				}
+			if _, ok := m.users[userID]; !ok {
+				m.users[userID] = make(map[int]int8)
+			}
 
-				if _, ok := m.users[uid][uid2]; !ok {
-					m.users[uid][uid2] = count
-				} else {
-					m.users[uid][uid2] += count
+			if _, ok := m.users[userID][x]; !ok {
+				m.users[userID][x] = 1
+			} else {
+				if m.users[userID][x] < 2 {
+					m.users[userID][x] += 1
 				}
 			}
 		}
