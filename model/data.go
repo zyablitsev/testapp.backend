@@ -89,9 +89,7 @@ func (m Data) IsDupes(userID1, userID2 int) bool {
 	if _, ok := m.users[userID1]; !ok {
 		return false
 	}
-	if v, ok := m.users[userID1][userID2]; !ok {
-		return false
-	} else {
+	if v, ok := m.users[userID1][userID2]; ok {
 		return v > 1
 	}
 
