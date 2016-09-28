@@ -1,10 +1,12 @@
-package settings
+package main
 
 import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
+	"sync"
 
 	"gopkg.in/yaml.v2"
 )
@@ -66,4 +68,34 @@ func (s *config) fromEnvDefault() {
 	if len(s.LogPath) == 0 {
 		s.LogPath = "/var/log/testapp/requests.log"
 	}
+}
+
+var (
+	instanceConfig *config
+	onceConfig     sync.Once
+)
+
+func getConfig() *config {
+	onceConfig.Do(func() {
+		var (
+			goPath                   = os.Getenv("GOPATH")
+			etcPath         string   = "/etc/testapp"
+			yamlConfigPath  string   = filepath.Join(etcPath, "config.yaml")
+			yamlConfigPaths []string = make([]string, 2)
+		)
+
+		instanceConfig = &config{}
+
+		yamlConfigPaths[0] = yamlConfigPath
+		if goPath != "" {
+			yamlConfigPaths[1] = filepath.Join(goPath, yamlConfigPath)
+		} else {
+			yamlConfigPaths = yamlConfigPaths[:1]
+		}
+
+		instanceConfig.yamlConfigPaths = yamlConfigPaths
+		instanceConfig.fromFile()
+		instanceConfig.fromEnvDefault()
+	})
+	return instanceConfig
 }

@@ -1,4 +1,4 @@
-package model
+package main
 
 import (
 	"bufio"
@@ -6,21 +6,32 @@ import (
 	"net"
 	"os"
 	"strconv"
-
-	"github.com/zyablitsev/testapp.backend/settings"
+	"sync"
 )
 
-type Data struct {
+type data struct {
 	seek  int64
 	users map[int]map[int]int8
 }
 
-func (m *Data) ReadLog() error {
+func (m *data) isDupes(userID1, userID2 int) bool {
+	// Return false if at least one of users not found
+	if _, ok := m.users[userID1]; !ok {
+		return false
+	}
+	if v, ok := m.users[userID1][userID2]; ok {
+		return v > 1
+	}
+
+	return false
+}
+
+func (m *data) readLog() error {
 	var (
 		logFile *os.File
 		ip      net.IP
 
-		config = settings.GetInstance()
+		config = getConfig()
 
 		line, lineUserID, lineIPAddress []byte
 		ipBytes                         [4]byte
@@ -84,14 +95,15 @@ func (m *Data) ReadLog() error {
 	return nil
 }
 
-func (m Data) IsDupes(userID1, userID2 int) bool {
-	// Return false if at least one of users not found
-	if _, ok := m.users[userID1]; !ok {
-		return false
-	}
-	if v, ok := m.users[userID1][userID2]; ok {
-		return v > 1
-	}
+var (
+	onceModel     sync.Once
+	instanceModel *data
+)
 
-	return false
+func getModel() *data {
+	onceModel.Do(func() {
+		instanceModel = new(data)
+		instanceModel.users = make(map[int]map[int]int8)
+	})
+	return instanceModel
 }

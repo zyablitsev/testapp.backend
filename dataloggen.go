@@ -1,4 +1,4 @@
-package testapp
+package main
 
 import (
 	"fmt"
@@ -11,8 +11,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/zyablitsev/testapp.backend/settings"
 )
 
 var (
@@ -35,7 +33,7 @@ func random(min, max int) int {
 	return rand.Intn(max-min) + min
 }
 
-func GenerateLogFile() error {
+func generateLogFile() error {
 	const (
 		cidrGroup1 string = "10.0.0.1/24"
 		cidrGroup2 string = "10.0.1.1/24"
@@ -46,7 +44,7 @@ func GenerateLogFile() error {
 
 		logFile *os.File
 
-		config     = settings.GetInstance()
+		config     = getConfig()
 		configPath = filepath.Dir(config.LogPath)
 
 		users [6000]int
