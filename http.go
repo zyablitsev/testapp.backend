@@ -35,7 +35,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// check request method and pattern
 	if r.Method != "GET" ||
-		(len(path) < 3 && len(path) > 4) ||
+		(len(path) < 3 || len(path) > 4) ||
 		(len(path) == 4 && len(path[3]) > 0) {
 		h.NotFound(w)
 		return
